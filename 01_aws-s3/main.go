@@ -17,7 +17,7 @@ var (
 )
 
 const (
-	BUCKET_NAME = "fuez487"
+	BUCKET_NAME = "fuez486"
 	REGION      = "us-east-2"
 )
 
@@ -114,12 +114,58 @@ func getObject(filename string) {
 	}
 }
 
+func deleteObject(filename string) (resp *s3.DeleteObjectOutput) {
+	fmt.Println("Deleting: ", filename)
+	resp, err := s3session.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(BUCKET_NAME),
+		Key:    aws.String(filename),
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	return resp
+
+}
+
 func main() {
 
-	fmt.Println(listBuckets())
-	fmt.Println(createBucket())
+	//fmt.Println(listBuckets())
+	//fmt.Println(createBucket())
 
-	uploadObject("files/gopher_.png")
+	//UploadObjects in S3 Bucket
+	//uploadObject("files/gopher_.png")
+
+	// List Files in S3 Bucket
+	//fmt.Println(listObjects())
+
+	// Downloads files from S3 Bucket
+	//getObject("gopher_.png")
+	fmt.Println(deleteObject("gopher_.png"))
 	fmt.Println(listObjects())
-	getObject("gopher_.png")
+
+	// Loop over files in the files folder & Delete the files from the bucket :)
+
+	folder := "files"
+
+	files, _ := ioutil.ReadDir(folder)
+	fmt.Println(files)
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		} else {
+			uploadObject(folder + "/" + file.Name())
+		}
+	}
+
+	fmt.Println(listObjects())
+
+	for _, object := range listObjects().Contents {
+		getObject(*object.Key)
+		deleteObject(*object.Key)
+	}
+
+	fmt.Println(listObjects())
+
 }
