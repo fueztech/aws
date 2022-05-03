@@ -1,0 +1,13 @@
+FROM golang:alpine
+
+LABEL base.name="golangtesting"
+
+WORKDIR /app
+
+COPY . .
+
+RUN go build -o main .
+
+EXPOSE 8085
+
+ENTRYPOINT ["./main"]
